@@ -17,10 +17,11 @@ You fly a little red-bellied courier plane at dawn, in chase view over patchwork
 
 ## How to play
 
-- **↑ / ↓** pitch (climb / dive), **← / →** bank and turn
+- **↑ / ↓** pitch (climb / dive), **← / →** bank and turn — steering is proportional and smoothed, so a tap gives a small correction and a hold ramps up to full deflection
 - **Shift** throttle up, **Ctrl** throttle down (W/S and A/D work too)
 - **Space** drop the parcel (also starts / restarts), **P** pause, **M** mute
 - **Mouse:** click to start or restart
+- **Touch:** drag the floating stick on the left half to steer (it springs back when you let go), drag the throttle slider on the right to set a throttle that stays put, **投包** drops the parcel, **暂停** pauses
 - **Sounds:** engine drone, ring chimes and landing fanfare are synthesized live with WebAudio — no audio files.
 
 ## Run it
@@ -46,7 +47,8 @@ Deterministic states, reproducible from the URL:
 - `game/src/config.js` — tuning, route, palette, missions
 - `game/src/random.js` — seeded random and terrain height
 - `game/src/world.js` — sortie state, physics, rings, drop, landing, scoring
-- `game/src/input.js` — keyboard + pointer
+- `game/src/input.js` — keyboard + pointer, proportional smoothed steering, throttle targets
+- `game/src/touch.js` — touch stick, throttle slider and buttons (touch devices only)
 - `game/src/render.js` — chase view, terrain, runway, plane, HUD
 - `game/src/audio.js` — WebAudio synth effects
 - `game/src/shots.js` — deterministic screenshot states
