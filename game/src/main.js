@@ -13,6 +13,7 @@ import { createWorld, EVENT_CRASH, EVENT_DROP, EVENT_FUEL_LOW, EVENT_LANDED, EVE
 import { createAudio } from './audio.js';
 import { createRenderer, SCREEN_DONE, SCREEN_OVER, SCREEN_PAUSED, SCREEN_PLAY, SCREEN_TITLE } from './render.js';
 import { applyShot } from './shots.js';
+import { createTouch } from './touch.js';
 
 /** The longest frame the loop catches up on; a longer stall is dropped. */
 const MAX_FRAME = 0.25;
@@ -27,6 +28,9 @@ const status = document.getElementById('status');
 const world = createWorld(createRandom(seed));
 const renderer = createRenderer(canvas);
 const audio = createAudio();
+// Read-only handle for automated checks (a playtest driving the real
+// game): the sortie state and the input, nothing more.
+window.__skyCourier = { state: world.state, input: null };
 
 function readBest() {
   try {
@@ -58,6 +62,8 @@ function runShot(name) {
 
 function runGame() {
   const input = createInput(canvas);
+  window.__skyCourier.input = input;
+  createTouch(input);
   let screen = SCREEN_TITLE;
   let best = readBest();
   let accumulator = 0;
@@ -105,7 +111,9 @@ function runGame() {
       const events = world.dropParcel();
       if (events & EVENT_DROP) audio.drop();
     }
-    if (actions & ACTION_CONFIRM && (screen === SCREEN_TITLE || screen === SCREEN_OVER || screen === SCREEN_DONE)) {
+    // Space starts and restarts too, as the screens promise ("Press Space
+    // or click to fly"); Enter and click do the same.
+    if (actions & (ACTION_CONFIRM | ACTION_DROP) && (screen === SCREEN_TITLE || screen === SCREEN_OVER || screen === SCREEN_DONE)) {
       startGame();
     } else if (actions & ACTION_PAUSE && screen === SCREEN_PLAY) {
       screen = SCREEN_PAUSED;
@@ -118,7 +126,7 @@ function runGame() {
 
   function step() {
     if (screen === SCREEN_TITLE) return;
-    const events = world.step(STEP, input.steering());
+    const events = world.step(STEP, input.steering(world.state.throttle, STEP));
     audio.engine(world.state.throttle, screen === SCREEN_PLAY);
     if (events & EVENT_RING) audio.ring();
     else if (events & EVENT_MISS) audio.miss();
